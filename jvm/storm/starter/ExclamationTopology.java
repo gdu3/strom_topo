@@ -17,12 +17,12 @@
  */
 package storm.starter;
 
-import storm.starter.TestWordSpout;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.testing.TestWordSpout;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.topology.base.BaseRichBolt;
@@ -64,14 +64,14 @@ public class ExclamationTopology {
     TopologyBuilder builder = new TopologyBuilder();
 
     builder.setSpout("word", new TestWordSpout(), 10);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 6).shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(), 4).shuffleGrouping("exclaim1");
+    builder.setBolt("exclaim1", new ExclamationBolt(), 3).shuffleGrouping("word");
+    builder.setBolt("exclaim2", new ExclamationBolt(), 2).shuffleGrouping("exclaim1");
 
     Config conf = new Config();
-    conf.setDebug(false);
+    conf.setDebug(true);
 
     if (args != null && args.length > 0) {
-      conf.setNumWorkers(5);
+      conf.setNumWorkers(3);
 
       StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
     }
