@@ -51,6 +51,7 @@ public class TwitterSampleSpout extends BaseRichSpout {
 	String accessToken;
 	String accessTokenSecret;
 	String[] keyWords;
+	int msg_id = 0;
 
 	public TwitterSampleSpout(String consumerKey, String consumerSecret,
 			String accessToken, String accessTokenSecret, String[] keyWords) {
@@ -129,9 +130,9 @@ public class TwitterSampleSpout extends BaseRichSpout {
 	public void nextTuple() {
 		Status ret = queue.poll();
 		if (ret == null) {
-			Utils.sleep(50);
+			Utils.sleep(5);
 		} else {
-			_collector.emit(new Values(ret));
+			_collector.emit(new Values(ret), new Integer(msg_id++));
 
 		}
 	}
