@@ -18,6 +18,7 @@
 package storm.starter;
 
 import storm.starter.TestWordSpout;
+import storm.starter.TestWordSpout_poisson;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -30,6 +31,8 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
+import backtype.storm.metric.LoggingMetricsConsumer;
+import java.lang.Exception;
 
 import java.util.Map;
 
@@ -48,7 +51,12 @@ public class ExclamationTopology {
 
     @Override
     public void execute(Tuple tuple) {
-      _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+      //Utils.sleep(1);
+      int sum = 0;
+      for(int i=0; i<400000; i++) {
+          sum += i;
+      }
+      _collector.emit(tuple, new Values(tuple.getString(0) + sum));
       _collector.ack(tuple);
     }
 
@@ -63,12 +71,20 @@ public class ExclamationTopology {
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("word", new TestWordSpout(), 10);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 6).shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(), 4).shuffleGrouping("exclaim1");
+    builder.setSpout("word", new TestWordSpout(), 5);
+    builder.setBolt("exclaim1", new ExclamationBolt(), 3).shuffleGrouping("word");
+    builder.setBolt("exclaim2", new ExclamationBolt(), 3).shuffleGrouping("exclaim1");
+    builder.setBolt("exclaim3", new ExclamationBolt(), 3).shuffleGrouping("exclaim2");
+    //builder.setBolt("exclaim4", new ExclamationBolt(), 5).shuffleGrouping("exclaim3");
 
     Config conf = new Config();
     conf.setDebug(false);
+    conf.setStatsSampleRate(1); // each message is tracked//
+    //conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 1);
+    //conf.setBuiltInMetricSecs(3);
+    conf.setIShuffleGroupingEnable(1); //0:default, 1:latency-based load balance, 2: the Power Of Two Choice
+    conf.setIShuffleGroupingAgingRate(0.5);
+
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(5);

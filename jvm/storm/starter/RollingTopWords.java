@@ -113,7 +113,7 @@ public class RollingTopWords {
     if (args.length >= 1) {
       topologyName = args[0];
     }
-    boolean runLocally = true;
+    boolean runLocally = false;
     if (args.length >= 2 && args[1].equalsIgnoreCase("remote")) {
       runLocally = false;
     }
