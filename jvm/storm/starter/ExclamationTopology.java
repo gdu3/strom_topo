@@ -48,6 +48,7 @@ public class ExclamationTopology {
 
     @Override
     public void execute(Tuple tuple) {
+      Utils.sleep(1);
       _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
       _collector.ack(tuple);
     }
@@ -63,12 +64,23 @@ public class ExclamationTopology {
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("word", new TestWordSpout(), 10);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 6).shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(), 4).shuffleGrouping("exclaim1");
+    builder.setSpout("word", new TestWordSpout(), 5);
+    builder.setBolt("exclaim1", new ExclamationBolt(), 5).shuffleGrouping("word");
+    builder.setBolt("exclaim2", new ExclamationBolt(), 5).shuffleGrouping("exclaim1");
+    builder.setBolt("exclaim3", new ExclamationBolt(), 5).shuffleGrouping("exclaim2");
+    //builder.setBolt("exclaim4", new ExclamationBolt(), 5).shuffleGrouping("exclaim3");
+    //builder.setBolt("exclaim5", new ExclamationBolt(), 5).shuffleGrouping("exclaim4");
+    //builder.setBolt("exclaim6", new ExclamationBolt(), 5).shuffleGrouping("exclaim5");
+    //builder.setBolt("exclaim7", new ExclamationBolt(), 5).shuffleGrouping("exclaim6");
+    //builder.setBolt("exclaim8", new ExclamationBolt(), 5).shuffleGrouping("exclaim7");
+    //builder.setBolt("exclaim9", new ExclamationBolt(), 5).shuffleGrouping("exclaim8");
 
     Config conf = new Config();
     conf.setDebug(false);
+    conf.setStatsSampleRate(1); // each message is tracked//
+    //conf.setReplicationRatio(0.5);
+    conf.setEnableTimeoutAdjustment(true);
+
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(5);

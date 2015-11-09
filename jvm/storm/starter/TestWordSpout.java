@@ -35,11 +35,18 @@ import org.slf4j.LoggerFactory;
 public class TestWordSpout extends BaseRichSpout {
     public static Logger LOG = LoggerFactory.getLogger(TestWordSpout.class);
     boolean _isDistributed;
-    SpoutOutputCollector _collector;
-    static int msg_id = 0;
+    
+    public SpoutOutputCollector _collector; // made it public
+    int msg_id = 0;
     final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
     final Random rand = new Random();
 
+    int innner_round = 0;
+    int round = 0;
+    // construct sin wave input
+    
+    int[] rate = new int[] {50,65,79,90,97,100,97,90,79,65,50,35,21,10,3,0,3,10,21,35};
+    
     public TestWordSpout() {
         this(true);
     }
@@ -57,9 +64,12 @@ public class TestWordSpout extends BaseRichSpout {
     }
         
     public void nextTuple() {
-        Utils.sleep(100);
-        final String word = words[rand.nextInt(words.length)];
-        _collector.emit(new Values(word), new Integer(msg_id++));
+        Utils.sleep(1);
+        
+        if(rand.nextInt(10)%2 == 0) {
+            final String word = words[rand.nextInt(words.length)];
+            _collector.emit(new Values(word), new Integer(msg_id++));
+        }
     }
     
     public void ack(Object msgId) {
