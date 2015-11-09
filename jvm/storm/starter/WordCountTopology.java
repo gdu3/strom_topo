@@ -17,6 +17,9 @@
  */
 package storm.starter;
 
+import storm.starter.SplitSentenceBolt;
+import storm.starter.spout.RandomSentenceSpout;
+import storm.starter.TestWordSpout;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -29,7 +32,6 @@ import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import storm.starter.spout.RandomSentenceSpout;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,22 +40,6 @@ import java.util.Map;
  * This topology demonstrates Storm's stream groupings and multilang capabilities.
  */
 public class WordCountTopology {
-  public static class SplitSentence extends ShellBolt implements IRichBolt {
-
-    public SplitSentence() {
-      super("python", "splitsentence.py");
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-      declarer.declare(new Fields("word"));
-    }
-
-    @Override
-    public Map<String, Object> getComponentConfiguration() {
-      return null;
-    }
-  }
 
   public static class WordCount extends BaseBasicBolt {
     Map<String, Integer> counts = new HashMap<String, Integer>();
@@ -67,6 +53,7 @@ public class WordCountTopology {
       count++;
       counts.put(word, count);
       collector.emit(new Values(word, count));
+      //collector.ack(tuple);
     }
 
     @Override
@@ -81,15 +68,15 @@ public class WordCountTopology {
 
     builder.setSpout("spout", new RandomSentenceSpout(), 5);
 
-    builder.setBolt("split", new SplitSentence(), 8).shuffleGrouping("spout");
-    builder.setBolt("count", new WordCount(), 12).fieldsGrouping("split", new Fields("word"));
+    builder.setBolt("split", new SplitSentenceBolt(), 5).shuffleGrouping("spout");
+    builder.setBolt("count", new WordCount(), 5).fieldsGrouping("split", new Fields("word"));
 
     Config conf = new Config();
-    conf.setDebug(true);
-
+    conf.setDebug(false);
+    conf.setStatsSampleRate(1); // each message is tracked//
 
     if (args != null && args.length > 0) {
-      conf.setNumWorkers(3);
+      conf.setNumWorkers(5);
 
       StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
     }

@@ -30,25 +30,38 @@ import java.util.HashMap;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
-public class TestWordSpout extends BaseRichSpout {
-    public static Logger LOG = LoggerFactory.getLogger(TestWordSpout.class);
+public class TestWordSpout_poisson extends BaseRichSpout {
+    public static Logger LOG = LoggerFactory.getLogger(TestWordSpout_poisson.class);
     boolean _isDistributed;
     
     public SpoutOutputCollector _collector; // made it public
     int msg_id = 0;
     final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
     final Random rand = new Random();
-    int round = 0;
-    int inner_round = 0;
+    ArrayList<Integer> poisson = new ArrayList(100);
+    int index_ = 0;
 
-    public TestWordSpout() {
+    public TestWordSpout_poisson() {
         this(true);
     }
 
-    public TestWordSpout(boolean isDistributed) {
+    public TestWordSpout_poisson(boolean isDistributed) {
         _isDistributed = isDistributed;
+        for(int i=0; i<37; i++) {
+            poisson.add(0);
+            poisson.add(1);
+        }
+        for(int i=0; i<19; i++) {
+            poisson.add(2);
+        }
+        for(int i=0; i<7; i++) {
+            poisson.add(3);
+        }
+        Collections.shuffle(poisson, rand);
     }
         
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
@@ -60,20 +73,21 @@ public class TestWordSpout extends BaseRichSpout {
     }
         
     public void nextTuple() {
-        Utils.sleep(1);
-        /*
-        if (++inner_round == 500) {
-            inner_round = 0;
-            round = (round + 1) % 10;
-        }*/
+        int num = 2 * poisson.get(index_++);
+        if(num == 0) {}
+        else {
+            Utils.sleep(1);
+            for(int i=0; i<num; i++) {
+                final String word = words[rand.nextInt(words.length)];
+                System.out.println(word);
+                _collector.emit(new Values(word), new Integer(msg_id++));
+            }
+        }
 
-        String word = words[rand.nextInt(words.length)];
-        _collector.emit(new Values(word), new Integer(msg_id++));
-        
-        //if(rand.nextInt(10) <= round) {
-        //    String word = words[rand.nextInt(words.length)];
-        //    _collector.emit(new Values(word), new Integer(msg_id++));
-        //}
+        if(index_ == 100) {
+            index_ = 0;
+            Collections.shuffle(poisson, rand);
+        }
     }
     
     public void ack(Object msgId) {

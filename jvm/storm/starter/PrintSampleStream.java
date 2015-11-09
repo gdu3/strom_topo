@@ -24,12 +24,13 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.utils.Utils;
+import backtype.storm.StormSubmitter;
 
 import storm.starter.bolt.PrinterBolt;
 import storm.starter.spout.TwitterSampleSpout;
 
 public class PrintSampleStream {        
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String consumerKey = args[0]; 
         String consumerSecret = args[1]; 
         String accessToken = args[2]; 
@@ -39,20 +40,32 @@ public class PrintSampleStream {
         
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout("twitter", new TwitterSampleSpout(consumerKey, consumerSecret,
+        builder.setSpout("twitter1", new TwitterSampleSpout(consumerKey, consumerSecret,
                                 accessToken, accessTokenSecret, keyWords));
-        builder.setBolt("print", new PrinterBolt())
-                .shuffleGrouping("twitter");
+        builder.setBolt("print", new PrinterBolt(), 5)
+                .shuffleGrouping("twitter1");
                 
                 
         Config conf = new Config();
-        
-        
-        LocalCluster cluster = new LocalCluster();
-        
-        cluster.submitTopology("test", conf, builder.createTopology());
-        
-        Utils.sleep(10000);
-        cluster.shutdown();
+	      conf.setDebug(false);
+    	  conf.setStatsSampleRate(1); // each message is tracked//
+    	  //conf.setReplicationRatio(0.2);
+    	  //conf.setEnableTimeoutAdjustment(false);
+
+	
+	if (true) {
+      		conf.setNumWorkers(5);
+      		StormSubmitter.submitTopologyWithProgressBar("twitter-example", conf, builder.createTopology());
+    	}
+    	else {
+      		conf.setMaxTaskParallelism(3);
+
+      		LocalCluster cluster = new LocalCluster();
+      		cluster.submitTopology("word-count", conf, builder.createTopology());
+
+      		Thread.sleep(10000);
+
+      		cluster.shutdown();
+    	}
     }
 }

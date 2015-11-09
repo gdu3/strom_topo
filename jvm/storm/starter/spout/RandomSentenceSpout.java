@@ -29,23 +29,26 @@ import java.util.Map;
 import java.util.Random;
 
 public class RandomSentenceSpout extends BaseRichSpout {
-  SpoutOutputCollector _collector;
+  public SpoutOutputCollector _collector; // made it public
   Random _rand;
-
+  static int g_spout_object_id = 0;
+  int msg_id = 0;
+  String[] sentences = new String[]{ "the cow jumped over the moon", "an apple a day keeps the doctor away",
+        "four score and seven years ago", "snow white and the seven dwarfs", "i am at two with nature" };
+  int spout_object_id;
 
   @Override
-  public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+  public synchronized void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
     _collector = collector;
     _rand = new Random();
+    spout_object_id = g_spout_object_id++;
   }
 
   @Override
   public void nextTuple() {
-    Utils.sleep(100);
-    String[] sentences = new String[]{ "the cow jumped over the moon", "an apple a day keeps the doctor away",
-        "four score and seven years ago", "snow white and the seven dwarfs", "i am at two with nature" };
+    Utils.sleep(1);
     String sentence = sentences[_rand.nextInt(sentences.length)];
-    _collector.emit(new Values(sentence));
+    _collector.emit(new Values(sentence), new String(spout_object_id + "_" + msg_id++));
   }
 
   @Override

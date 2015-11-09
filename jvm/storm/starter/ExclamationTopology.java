@@ -18,6 +18,7 @@
 package storm.starter;
 
 import storm.starter.TestWordSpout;
+import storm.starter.TestWordSpout_poisson;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -30,6 +31,9 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
+import backtype.storm.metric.LoggingMetricsConsumer;
+import storm.starter.SplitSentenceBolt;
+import storm.starter.spout.RandomSentenceSpout;
 
 import java.util.Map;
 
@@ -48,6 +52,7 @@ public class ExclamationTopology {
 
     @Override
     public void execute(Tuple tuple) {
+      Utils.sleep(2);
       _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
       _collector.ack(tuple);
     }
@@ -64,11 +69,15 @@ public class ExclamationTopology {
     TopologyBuilder builder = new TopologyBuilder();
 
     builder.setSpout("word", new TestWordSpout(), 10);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 6).shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(), 4).shuffleGrouping("exclaim1");
+    builder.setBolt("split", new ExclamationBolt(), 20).shuffleGrouping("word");
+    //builder.setBolt("exclaim", new ExclamationBolt(), 10).shuffleGrouping("split");
+    //builder.setBolt("exclaim3", new ExclamationBolt(), 10).shuffleGrouping("exclaim2");
+    //builder.setBolt("exclaim4", new ExclamationBolt(), 10).shuffleGrouping("exclaim3");
 
     Config conf = new Config();
     conf.setDebug(false);
+    conf.setStatsSampleRate(1); // each message is tracked//
+    conf.setImprovedConcurrencyModel(true);
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(5);
