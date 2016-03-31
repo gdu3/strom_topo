@@ -28,33 +28,31 @@ import backtype.storm.utils.Utils;
 import java.util.Map;
 import java.util.Random;
 
-public class RandomSentenceSpout extends BaseRichSpout {
+public class RandomLogSpout extends BaseRichSpout {
   SpoutOutputCollector _collector;
-  Random _rand;
+  Random _rand = new Random();
+  int msg_id = 0;
+  String[] sentences = new String[]{ "the cow jumped over the moon", "the cow jumped over the moon, The quick brown fox jumps over the lazy dog", "an apple a day keeps the doctor away,an apple a day keeps the doctor away and this is supposed to be a very long log line",
+        "four score and seven years ago","random", "snow white and the seven dwarfs","snow white", "i am at two with nature" };
 
 
   public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
     _collector = collector;
-    _rand = new Random();
   }
-
 
   public void nextTuple() {
-    Utils.sleep(100);
-    String[] sentences = new String[]{ "the cow jumped over the moon", "an apple a day keeps the doctor away",
-        "four score and seven years ago", "snow white and the seven dwarfs", "i am at two with nature" };
-    String sentence = sentences[_rand.nextInt(sentences.length)];
-    _collector.emit(new Values(sentence));
+    Utils.sleep(1);
+    if(_rand.nextInt(10) < 6) {
+      String sentence = sentences[_rand.nextInt(sentences.length)];
+      _collector.emit(new Values(sentence), new Integer(msg_id++));
+    }
   }
-
 
   public void ack(Object id) {
   }
 
-
   public void fail(Object id) {
   }
-
 
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
     declarer.declare(new Fields("word"));
