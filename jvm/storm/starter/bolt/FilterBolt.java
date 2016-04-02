@@ -26,10 +26,14 @@ public class FilterBolt extends BaseRichBolt{
     }
 
     public void execute(Tuple tuple) {
-    	String word = tuple.getString(0);
-    	Integer length=word.length();
-    	
-    	_collector.emit(tuple, new Values(tuple.getString(0)));
+
+      int sum = 0;
+      for (int i=0; i<300000; i++) {
+        sum += i;
+      }
+
+    	String word = tuple.getString(0); 	
+    	_collector.emit(tuple, new Values(tuple.getString(0) + sum));
     	_collector.ack(tuple);
     }
 

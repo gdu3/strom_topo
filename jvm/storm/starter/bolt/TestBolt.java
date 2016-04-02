@@ -23,9 +23,8 @@ public class TestBolt extends BaseRichBolt{
     }
 
     public void execute(Tuple tuple) {
-      //Utils.sleep(1);
       int sum = 0;
-      for(int i=0; i<250000; i++) {
+      for (int i=0; i<300000; i++) {
         sum += i;
       }
 

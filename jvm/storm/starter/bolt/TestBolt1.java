@@ -15,25 +15,16 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
-public class TransformBolt extends BaseRichBolt{
+public class TestBolt1 extends BaseRichBolt{
 	OutputCollector _collector;
-
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
       _collector = collector;
     }
 
     public void execute(Tuple tuple) {
-    	
-      int sum = 0;
-      for (int i=0; i<200000; i++) {
-        sum += i;
-      }
-     
-      String word = tuple.getString(0);
-    	Integer length=word.length();
-    	word=word.substring(0,(int)(0.8*word.length()));
-      _collector.emit(tuple, new Values(word + sum));
+
+      _collector.emit(tuple, new Values(tuple.getString(0)));
       _collector.ack(tuple);
     }
 
