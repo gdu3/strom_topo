@@ -24,16 +24,11 @@ public class TransformBolt extends BaseRichBolt{
     }
 
     public void execute(Tuple tuple) {
-    	
-      int sum = 0;
-      for (int i=0; i<200000; i++) {
-        sum += i;
-      }
-     
+
       String word = tuple.getString(0);
     	Integer length=word.length();
     	word=word.substring(0,(int)(0.8*word.length()));
-      _collector.emit(tuple, new Values(word + sum));
+      _collector.emit(tuple, new Values(word));
       _collector.ack(tuple);
     }
 

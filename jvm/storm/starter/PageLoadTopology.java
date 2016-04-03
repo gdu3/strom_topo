@@ -29,8 +29,7 @@ public class PageLoadTopology {
 		Config conf = new Config();
 		conf.setDebug(false);
     	conf.setStatsSampleRate(1); // each message is tracked//
-    	conf.setIShuffleGroupingEnable(0); //0:default, 1:latency-based load balance, 2: the Power Of Two Choice
-    	conf.setIShuffleGroupingAgingRate(0.5);
+    	conf.setEnableTimeoutAdjustment(true);
 		
 		conf.setNumWorkers(5);
 		StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());

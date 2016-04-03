@@ -24,18 +24,13 @@ public class AggregationBolt extends BaseRichBolt{
 
     public void execute(Tuple tuple) {
 
-    	int sum = 0;
-    	for (int i=0; i<200000; i++) {
-    		sum += i;
-    	}
-
     	String word = tuple.getString(0);
     	byte b=0x10;
     	word+=Byte.toString(b);
     	word+=Byte.toString(b);
     	word+=Byte.toString(b);
     	word+=Byte.toString(b);
-      	_collector.emit(tuple, new Values(word + sum));
+      	_collector.emit(tuple, new Values(word));
       	_collector.ack(tuple);
     }
 

@@ -23,12 +23,7 @@ public class TestBolt extends BaseRichBolt{
     }
 
     public void execute(Tuple tuple) {
-      int sum = 0;
-      for (int i=0; i<300000; i++) {
-        sum += i;
-      }
-
-      _collector.emit(tuple, new Values(tuple.getString(0) + sum));
+      _collector.emit(tuple, new Values(tuple.getString(0)));
       _collector.ack(tuple);
     }
 
