@@ -67,7 +67,7 @@ public class TestWordSpout extends BaseRichSpout {
     public void nextTuple() {
         Utils.sleep(1);
 
-        if(rand.nextInt(10) < 2) {
+        if(rand.nextInt(10) < 9) {
             String word = words[rand.nextInt(words.length)];
             _collector.emit(new Values(word), new String( (msg_id++) + "_" + self_spout_id ));
         }
