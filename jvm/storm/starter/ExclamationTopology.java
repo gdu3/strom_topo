@@ -75,7 +75,7 @@ public class ExclamationTopology {
     Config conf = new Config();
     conf.setDebug(false);
     conf.setStatsSampleRate(1); // each message is tracked//
-    conf.setImprovedConcurrencyModel(true);
+    conf.setEnableTimeoutAdjustment(true);
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(5);
