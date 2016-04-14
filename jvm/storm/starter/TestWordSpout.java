@@ -42,6 +42,8 @@ public class TestWordSpout extends BaseRichSpout {
     final Random rand = new Random();
     int round = 0;
     int inner_round = 0;
+    static int spout_id = 0;
+    int self_spout_id = 0;
 
     public TestWordSpout() {
         this(true);
@@ -51,8 +53,11 @@ public class TestWordSpout extends BaseRichSpout {
         _isDistributed = isDistributed;
     }
         
-    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+    public synchronized void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
+        self_spout_id = spout_id;
+        spout_id++;
+
     }
     
     public void close() {
@@ -61,19 +66,11 @@ public class TestWordSpout extends BaseRichSpout {
         
     public void nextTuple() {
         Utils.sleep(1);
-        /*
-        if (++inner_round == 500) {
-            inner_round = 0;
-            round = (round + 1) % 10;
-        }*/
 
-        String word = words[rand.nextInt(words.length)];
-        _collector.emit(new Values(word), new Integer(msg_id++));
-        
-        //if(rand.nextInt(10) <= round) {
-        //    String word = words[rand.nextInt(words.length)];
-        //    _collector.emit(new Values(word), new Integer(msg_id++));
-        //}
+        if(rand.nextInt(10) < 2) {
+            String word = words[rand.nextInt(words.length)];
+            _collector.emit(new Values(word), new String( (msg_id++) + "_" + self_spout_id ));
+        }
     }
     
     public void ack(Object msgId) {
