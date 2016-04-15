@@ -52,12 +52,8 @@ public class ExclamationTopology {
 
     @Override
     public void execute(Tuple tuple) {
-      //Utils.sleep(1);
-      int sum = 0;
-      for(int i=0; i<200000; i++) {
-          sum += i;
-      }
-      _collector.emit(tuple, new Values(tuple.getString(0) + sum));
+      Utils.sleep(1);
+      _collector.emit(tuple, new Values(tuple.getString(0)));
       _collector.ack(tuple);
     }
 
@@ -81,8 +77,7 @@ public class ExclamationTopology {
     Config conf = new Config();
     conf.setDebug(false);
     conf.setStatsSampleRate(1); // each message is tracked//
-    conf.setIShuffleGroupingEnable(1); //0:default, 1:latency-based load balance, 2: the Power Of Two Choice
-    conf.setIShuffleGroupingAgingRate(0.5);
+    conf.setEnableTimeoutAdjustment(false);
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(5);
