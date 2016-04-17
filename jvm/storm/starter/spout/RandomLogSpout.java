@@ -42,7 +42,7 @@ public class RandomLogSpout extends BaseRichSpout {
 
   public void nextTuple() {
     Utils.sleep(1);
-    if(_rand.nextInt(10) < 8) {
+    if(_rand.nextInt(10) < 9) {
       String sentence = sentences[_rand.nextInt(sentences.length)];
       _collector.emit(new Values(sentence), new Integer(msg_id++));
     }

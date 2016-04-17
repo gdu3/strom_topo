@@ -26,7 +26,7 @@ public class FilterBolt extends BaseRichBolt{
     }
 
     public void execute(Tuple tuple) {
-      Utils.sleep(1);
+      //Utils.sleep(1);
     	String word = tuple.getString(0); 	
     	_collector.emit(tuple, new Values(tuple.getString(0)));
     	_collector.ack(tuple);
